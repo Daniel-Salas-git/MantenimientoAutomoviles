@@ -37,7 +37,7 @@ class DashboardView(QMainWindow):
 
         # Botón para gestionar vehículos (visible para Recepcionista y Administrador)
         if rol in ["Administrador", "Recepcionista"]:
-            self.btn_vehicles = QPushButton("Gestión de Vehículos", self)
+            self.btn_vehicles = QPushButton("Gestión de Vehículos/Clientes", self)
             self.btn_vehicles.clicked.connect(self.open_vehicle_view)
             layout.addWidget(self.btn_vehicles)
     

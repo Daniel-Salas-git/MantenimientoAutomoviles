@@ -10,12 +10,16 @@ class User:
 
     @staticmethod
     def get_all():
-        """Obtiene todos los usuarios de la base de datos."""
+        """Obtiene los nombres de todos los usuarios de la base de datos."""
         db = BaseDatos().get_connection()
         cursor = db.cursor()
-        cursor.execute("SELECT * FROM Usuarios")
-        rows = cursor.fetchall()
-        return [User(*row) for row in rows]
+        try:
+            cursor.execute("SELECT id, nombre, usuario, contraseña, rol FROM Usuarios")
+            rows = cursor.fetchall()
+            return [User(id=row[0], nombre=row[1], usuario=row[2], contraseña=row[3], rol=row[4]) for row in rows]
+        except Exception as e:
+            print(f"Error al obtener usuarios: {e}")
+            return []
 
     def save(self):
         """Guarda un nuevo usuario en la base de datos."""

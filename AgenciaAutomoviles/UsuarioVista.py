@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QMessageBox
+from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QMessageBox, QComboBox
 from UsuarioControlador import UserController
 
 class UserView(QMainWindow):
@@ -35,7 +35,9 @@ class UserView(QMainWindow):
         self.layout.addWidget(self.input_contraseña)
 
         self.label_rol = QLabel("Rol:", self)
-        self.input_rol = QLineEdit(self)
+        self.input_rol = QComboBox(self)
+        self.input_rol.addItem("Selecciona una opción") 
+        self.input_rol.addItems(self.ROLES)  # Agregar los roles predefinidos al combobox
         self.layout.addWidget(self.label_rol)
         self.layout.addWidget(self.input_rol)
 
@@ -80,7 +82,7 @@ class UserView(QMainWindow):
         nombre = self.input_nombre.text()
         usuario = self.input_usuario.text()
         contraseña = self.input_contraseña.text()
-        rol = self.input_rol.text()
+        rol = self.input_rol.currentText()
 
         if not (nombre and usuario and contraseña and rol):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
@@ -89,6 +91,7 @@ class UserView(QMainWindow):
         if self.controller.add_user(nombre, usuario, contraseña, rol):
             QMessageBox.information(self, "Éxito", "Usuario agregado correctamente.")
             self.load_users()
+            self.clear_fields() 
         else:
             QMessageBox.critical(self, "Error", "No se pudo agregar el usuario.")
 
@@ -103,7 +106,7 @@ class UserView(QMainWindow):
         nombre = self.input_nombre.text()
         usuario = self.input_usuario.text()
         contraseña = self.input_contraseña.text()
-        rol = self.input_rol.text()
+        rol = self.input_rol.currentText()
 
         if not (nombre and usuario and contraseña and rol):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
@@ -112,6 +115,7 @@ class UserView(QMainWindow):
         if self.controller.update_user(user_id, nombre, usuario, contraseña, rol):
             QMessageBox.information(self, "Éxito", "Usuario actualizado correctamente.")
             self.load_users()
+            self.clear_fields()
         else:
             QMessageBox.critical(self, "Error", "No se pudo actualizar el usuario.")
 
@@ -130,3 +134,11 @@ class UserView(QMainWindow):
         else:
             QMessageBox.critical(self, "Error", "No se pudo eliminar el usuario.")
         
+    ROLES = ["Administrador", "Gerente", "Técnico", "Recepcionista"]
+    
+    def clear_fields(self):
+        """Limpia todos los campos de entrada."""
+        self.input_nombre.clear()
+        self.input_usuario.clear()
+        self.input_contraseña.clear()
+        self.input_rol.setCurrentIndex(0)

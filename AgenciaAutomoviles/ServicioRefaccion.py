@@ -28,7 +28,7 @@ class ServicioRefaccion:
         cursor = db.cursor()
         cursor.execute(
             """
-            SELECT r.nombre, sr.cantidad
+            SELECT sr.id_servicio,r.nombre, sr.cantidad, r.precio
             FROM Servicio_Refacciones sr
             JOIN Refacciones r ON sr.id_refaccion = r.id
             WHERE sr.id_servicio = %s
@@ -71,3 +71,4 @@ class ServicioRefaccion:
         except Exception as e:
             print(f"Error al eliminar la refacción: {e}")
             return False
+        

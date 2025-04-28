@@ -1,6 +1,9 @@
 from Servicio import Service
 from BaseDatos import BaseDatos
 from ServicioRefaccion import ServicioRefaccion
+from Usuario import User  # Importar el modelo User
+from Vehiculo import Vehicle  # Importar el modelo Vehicle
+
 
 
 class ServiceController:
@@ -8,14 +11,14 @@ class ServiceController:
         """Obtiene todos los servicios utilizando el modelo."""
         return Service.get_all()
 
-    def add_service(self, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por):
+    def add_service(self, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
         """Agrega un nuevo servicio utilizando el modelo."""
-        service = Service(id_vehiculo=id_vehiculo, estatus=estatus, fecha_servicio=fecha_servicio, proximo_servicio=proximo_servicio, responsable=responsable, entregado_por=entregado_por)
+        service = Service(id_vehiculo=id_vehiculo, estatus=estatus, fecha_servicio=fecha_servicio, proximo_servicio=proximo_servicio, responsable=responsable, entregado_por=entregado_por, diagnostico=diagnostico)
         return service.save()
 
-    def update_service(self, folio, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por):
+    def update_service(self, folio, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
         """Actualiza un servicio existente utilizando el modelo."""
-        service = Service(folio=folio, id_vehiculo=id_vehiculo, estatus=estatus, fecha_servicio=fecha_servicio, proximo_servicio=proximo_servicio, responsable=responsable, entregado_por=entregado_por)
+        service = Service(folio=folio, id_vehiculo=id_vehiculo, estatus=estatus, fecha_servicio=fecha_servicio, proximo_servicio=proximo_servicio, responsable=responsable, entregado_por=entregado_por, diagnostico=diagnostico)
         return service.update()
 
     def delete_service(self, folio):
@@ -52,9 +55,17 @@ class ServiceController:
         return servicio_refaccion.save()
     
     def get_refacciones_by_service(self, id_servicio):
-        """Obtiene las refacciones asociadas a un servicio."""
+        """Obtiene las refacciones asociadas a un servicio especifico."""
         return ServicioRefaccion.get_by_service(id_servicio)
     
     def delete_refaccion_from_service(self, id_servicio, nombre_refaccion):
         """Elimina una refacción asociada a un servicio."""
         return ServicioRefaccion.delete_by_service_and_refaccion(id_servicio, nombre_refaccion)
+    
+    def get_all_users(self):
+        """Obtiene todos los usuarios desde el modelo User."""
+        return User.get_all()  # Llama al método estático del modelo User
+    
+    def get_all_id_vehicles(self):
+        """Obtiene todos los usuarios desde el modelo Vehicle."""
+        return Vehicle.get_all()  # Llama al método estático del modelo Vehicle
