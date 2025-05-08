@@ -114,7 +114,7 @@ class ServiceView(QMainWindow):
         self.table.setRowCount(len(services))
         for row_idx, service in enumerate(services):
             self.table.setItem(row_idx, 0, QTableWidgetItem(str(service.folio)))
-            self.table.setItem(row_idx, 1, QTableWidgetItem(service.id_vehiculo))
+            self.table.setItem(row_idx, 1, QTableWidgetItem(str(service.id_vehiculo)))
             self.table.setItem(row_idx, 2, QTableWidgetItem(service.estatus))
             self.table.setItem(row_idx, 3, QTableWidgetItem(str(service.fecha_servicio)))
             self.table.setItem(row_idx, 4, QTableWidgetItem(str(service.proximo_servicio)))
@@ -124,7 +124,11 @@ class ServiceView(QMainWindow):
 
     def add_service(self):
         """Agrega un nuevo servicio utilizando el controlador."""
-        id_vehiculo = self.input_id_vehiculo.currentText()
+        id_vehiculo = self.input_id_vehiculo.currentData()  # Obtener el ID del vehículo seleccionado
+        if not id_vehiculo:
+            QMessageBox.warning(self, "Error", "Debes seleccionar un vehículo válido.")
+            return
+
         estatus = self.input_estatus.currentText()
         fecha_servicio = self.input_fecha_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         proximo_servicio = self.input_proximo_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
@@ -132,7 +136,7 @@ class ServiceView(QMainWindow):
         entregado_por = self.input_entregado_por.text()
         diagonostico = self.input_diagnostico.text()
 
-        if not (id_vehiculo and estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagonostico):
+        if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagonostico):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
             return
         
@@ -143,6 +147,7 @@ class ServiceView(QMainWindow):
         if self.controller.add_service(id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagonostico):
             QMessageBox.information(self, "Éxito", "Servicio agregado correctamente.")
             self.load_services()
+            self.populate_entregado_por_combobox()  # Volver a llenar el combobox
             self.clear_fields()
         else:
             QMessageBox.critical(self, "Error", "No se pudo agregar el servicio.")
@@ -153,9 +158,12 @@ class ServiceView(QMainWindow):
         if selected_row == -1:
             QMessageBox.warning(self, "Error", "Selecciona un servicio para actualizar.")
             return
+        id_vehiculo = self.input_id_vehiculo.currentData()  # Obtener el ID del vehículo seleccionado
+        if not id_vehiculo:
+            QMessageBox.warning(self, "Error", "Debes seleccionar un vehículo válido.")
+            return
 
         folio = self.table.item(selected_row, 0).text()
-        id_vehiculo = self.input_id_vehiculo.currentText()
         estatus = self.input_estatus.currentText()
         fecha_servicio = self.input_fecha_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         proximo_servicio = self.input_proximo_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
@@ -163,7 +171,7 @@ class ServiceView(QMainWindow):
         entregado_por = self.input_entregado_por.text()
         diagnostico = self.input_diagnostico.text()
 
-        if not (id_vehiculo and estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagnostico):
+        if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagnostico):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
             return
         
@@ -174,6 +182,7 @@ class ServiceView(QMainWindow):
         if self.controller.update_service(folio, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
             QMessageBox.information(self, "Éxito", "Servicio actualizado correctamente.")
             self.load_services()
+            self.populate_entregado_por_combobox()  # Volver a llenar el combobox
             self.clear_fields()
         else:
             QMessageBox.critical(self, "Error", "No se pudo actualizar el servicio.")
@@ -317,7 +326,7 @@ class ServiceView(QMainWindow):
             
     def clear_fields(self):
         """Limpia todos los campos de entrada."""
-        self.input_id_vehiculo.clear()
+        self.input_id_vehiculo.setCurrentIndex(0)
         self.input_estatus.setCurrentIndex(0)  # Restablecer el QComboBox al valor inicial
         self.input_fecha_servicio.setDate(QDate.currentDate())  # Restablecer la fecha al día actual
         self.input_proximo_servicio.setDate(QDate.currentDate())  # Restablecer la fecha al día actual
@@ -326,11 +335,14 @@ class ServiceView(QMainWindow):
         self.input_diagnostico.clear()
         
     def populate_entregado_por_combobox(self):
-        """Llena el combobox de responsables con los clientes registrados."""
-        ids = self.controller.get_all_id_vehicles()  # Obtener ids desde el controlador
-        if ids:
-            self.input_id_vehiculo.addItem("Selecciona un Id")  # Opción inicial
-            id_vehiculo = [str(Vehicle.id) for Vehicle in ids]
-            self.input_id_vehiculo.addItems(id_vehiculo)
+        """Llena el combobox de ID Vehículo con información adicional (cliente y teléfono)."""
+        self.input_id_vehiculo.clear() 
+        vehiculos = self.controller.get_all_id_vehicles()  # Obtener vehículos desde el controlador
+        if vehiculos:
+            self.input_id_vehiculo.addItem("Selecciona un vehículo")  # Opción inicial
+            for vehiculo in vehiculos:
+                # Crear una descripción completa para mostrar en el combobox
+                descripcion = f"{vehiculo.id} - {vehiculo.cliente} - {vehiculo.telefono}"
+                self.input_id_vehiculo.addItem(descripcion, vehiculo.id)  # Asociar el ID como dato adicional
         else:
-            QMessageBox.warning(self, "Error", "No se pudieron cargar los id.")
+            QMessageBox.warning(self, "Error", "No se pudieron cargar los vehículos.")

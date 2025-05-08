@@ -1,0 +1,183 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' Clases principales
+class BaseDatos {
+  + get_connection(): Connection
+}
+
+class Usuario {
+  - id: int
+  - nombre: str
+  - usuario: str
+  - contraseña: str
+  - rol: str
+  + get_all(): list
+  + save(): bool
+  + update(): bool
+  + delete(user_id: int): bool
+}
+
+class Vehiculo {
+  - id: int
+  - marca: str
+  - modelo: str
+  - año: int
+  - cliente: str
+  - telefono: str
+  + get_all(): list
+  + save(): bool
+  + update(): bool
+  + delete(vehicle_id: int): bool
+}
+
+class Servicio {
+  - folio: int
+  - id_vehiculo: int
+  - estatus: str
+  - fecha_servicio: date
+  - proximo_servicio: date
+  - responsable: str
+  - entregado_por: str
+  - diagnostico: str
+  + get_all(): list
+  + save(): bool
+  + update(): bool
+  + delete(folio: int): bool
+  + get_by_vehicle(id_vehiculo: int): list
+}
+
+class ServicioRefaccion {
+  - id_servicio: int
+  - id_refaccion: int
+  - cantidad: int
+  + save(): bool
+  + get_by_service(id_servicio: int): list
+  + delete_by_service_and_refaccion(id_servicio: int, nombre_refaccion: str): bool
+}
+
+class Refaccion {
+  - id: int
+  - nombre: str
+  - precio: float
+  + get_all(): list
+  + save(): bool
+  + get_by_service(id_servicio: int): list
+}
+
+' Controladores
+class UserController {
+  + get_all_users(): list
+  + add_user(nombre: str, usuario: str, contraseña: str, rol: str): bool
+  + update_user(user_id: int, nombre: str, usuario: str, contraseña: str, rol: str): bool
+  + delete_user(user_id: int): bool
+}
+
+class VehicleController {
+  + get_all_vehicles(): list
+  + add_vehicle(marca: str, modelo: str, año: int, cliente: str, telefono: str): bool
+  + update_vehicle(vehicle_id: int, marca: str, modelo: str, año: int, cliente: str, telefono: str): bool
+  + delete_vehicle(vehicle_id: int): bool
+  + get_services_by_vehicle(id_vehiculo: int): list
+}
+
+class ServiceController {
+  + get_all_services(): list
+  + add_service(id_vehiculo: int, estatus: str, fecha_servicio: date, proximo_servicio: date, responsable: str, entregado_por: str, diagnostico: str): bool
+  + update_service(folio: int, id_vehiculo: int, estatus: str, fecha_servicio: date, proximo_servicio: date, responsable: str, entregado_por: str, diagnostico: str): bool
+  + delete_service(folio: int): bool
+  + get_refacciones_by_service(id_servicio: int): list
+  + add_refaccion_to_service(id_servicio: int, id_refaccion: int, cantidad: int): bool
+  + delete_refaccion_from_service(id_servicio: int, nombre_refaccion: str): bool
+}
+
+class RefaccionController {
+  + get_all_refacciones(): list
+  + add_refaccion(nombre: str, precio: float): bool
+  + update_refaccion(refaccion_id: int, nombre: str, precio: float): bool
+  + delete_refaccion(refaccion_id: int): bool
+}
+
+' Vistas
+class LoginView {
+  + login(): None
+  + open_dashboard(rol: str): None
+  + clear_fields(): None
+}
+
+class DashboardView {
+  + open_user_view(): None
+  + open_service_view(): None
+  + open_vehicle_view(): None
+  + open_dashboard_graph(): None
+  + logout(): None
+}
+
+class UserView {
+  + load_users(): None
+  + add_user(): None
+  + update_user(): None
+  + delete_user(): None
+}
+
+class VehicleView {
+  + load_vehicles(): None
+  + add_vehicle(): None
+  + update_vehicle(): None
+  + delete_vehicle(): None
+  + view_services(): None
+}
+
+class ServiceView {
+  + load_services(): None
+  + add_service(): None
+  + update_service(): None
+  + delete_service(): None
+  + add_refaccion_to_service(): None
+  + view_refacciones(): None
+  + delete_refaccion(): None
+}
+
+class DashboardGraphView {
+  + update_graph(): None
+  + show_all(): None
+  + plot_graph(status_counts: dict, title: str): None
+}
+
+class RefaccionSelectorDialog {
+  + load_refacciones(): None
+  + select_refaccion(): None
+}
+
+class VehiculoDialog {
+  + get_data(): dict
+}
+
+' Relaciones
+BaseDatos <.. Usuario
+BaseDatos <.. Vehiculo
+BaseDatos <.. Servicio
+BaseDatos <.. ServicioRefaccion
+BaseDatos <.. Refaccion
+
+UserController --> Usuario
+VehicleController --> Vehiculo
+ServiceController --> Servicio
+ServiceController --> ServicioRefaccion
+RefaccionController --> Refaccion
+
+LoginView --> DashboardView
+DashboardView --> UserView
+DashboardView --> VehicleView
+DashboardView --> ServiceView
+DashboardView --> DashboardGraphView
+ServiceView --> RefaccionSelectorDialog
+VehicleView --> VehiculoDialog
+
+' Conexiones entre controladores y vistas
+UserView --> UserController
+VehicleView --> VehicleController
+ServiceView --> ServiceController
+RefaccionSelectorDialog --> RefaccionController
+
+@enduml
