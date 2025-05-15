@@ -1,14 +1,16 @@
-from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QMessageBox, QDialog, QComboBox,QDateEdit
+from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QMessageBox, QDialog, QComboBox,QDateEdit, QHBoxLayout, QRadioButton
 from PyQt5.QtCore import QDate
-from ServicioControlador import ServiceController
-from CuadroDialogoRefacciones import RefaccionSelectorDialog
+from Controlador.ServicioControlador import ServiceController
+from Vista.CuadroDialogoRefacciones import RefaccionSelectorDialog
+from Controlador.ClienteController import ClienteController
 
 class ServiceView(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Gestión de Servicios")
         self.setGeometry(100, 100, 800, 600)
-
+        
+        self.controller = ClienteController()  # Instancia del controlador de clientes
         self.controller = ServiceController()  # Instancia del controlador
 
         # Layout principal
@@ -20,15 +22,9 @@ class ServiceView(QMainWindow):
         self.table.setHorizontalHeaderLabels(["Folio", "ID Vehículo", "Estatus", "Fecha Servicio", "Próximo Servicio", "Diagnostico","Responsable", "Entregado Por"])
         self.layout.addWidget(self.table)
 
-        # Campos de entrada
-        #self.label_id_vehiculo = QLabel("ID Vehículo:", self)
-        #self.input_id_vehiculo = QLineEdit(self)
-        #self.layout.addWidget(self.label_id_vehiculo)
-        #self.layout.addWidget(self.input_id_vehiculo)
-
         self.label_id_vehiculo = QLabel("ID Vehículo:")
         self.input_id_vehiculo = QComboBox(self)  # Cambiar QLineEdit por QComboBox
-        self.populate_entregado_por_combobox()  # Llenar el combobox con los ids
+        self.populate_vehiculo_combobox()  # Llenar el combobox con los ids
         self.layout.addWidget(self.label_id_vehiculo)
         self.layout.addWidget(self.input_id_vehiculo)
 
@@ -69,12 +65,39 @@ class ServiceView(QMainWindow):
         self.populate_responsable_combobox()  # Llenar el combobox con los usuarios
         self.layout.addWidget(self.label_responsable)
         self.layout.addWidget(self.input_responsable)
-        
-        self.label_entregado_por = QLabel("Entregado Por:", self)
-        self.input_entregado_por = QLineEdit(self)
+
+                # Campo para "Entregado Por"
+        self.label_entregado_por = QLabel("Entregado Por:")
         self.layout.addWidget(self.label_entregado_por)
+
+        # Radio buttons para seleccionar entre cliente existente u otro
+        self.radio_cliente_existente = QRadioButton("Cliente Existente")
+        self.radio_otro = QRadioButton("Otro")
+        self.radio_otro.setChecked(True)  # Por defecto, seleccionado "Otro"
+
+        # Layout horizontal para los radio buttons
+        self.radio_layout = QHBoxLayout()
+        self.radio_layout.addWidget(self.radio_cliente_existente)
+        self.radio_layout.addWidget(self.radio_otro)
+        self.layout.addLayout(self.radio_layout)
+
+        # ComboBox para clientes existentes
+        self.combo_entregado_por = QComboBox(self)
+        self.combo_entregado_por.setPlaceholderText("Selecciona un cliente")
+        self.combo_entregado_por.hide()  # Ocultar inicialmente
+        self.layout.addWidget(self.combo_entregado_por)
+        print("ComboBox 'combo_entregado_por' creado.")  # Depuración
+
+
+        # LineEdit para ingresar manualmente el nombre
+        self.input_entregado_por = QLineEdit(self)
         self.layout.addWidget(self.input_entregado_por)
 
+        # Conectar los radio buttons a la lógica de cambio
+        self.radio_cliente_existente.toggled.connect(self.toggle_entregado_por)
+
+        self.populate_entregado_por_combobox()
+                
         # Botones
         self.btn_add = QPushButton("Agregar Servicio", self)
         self.btn_add.clicked.connect(self.add_service)
@@ -99,6 +122,7 @@ class ServiceView(QMainWindow):
         self.btn_view_refacciones = QPushButton("Ver Refacciones", self)
         self.btn_view_refacciones.clicked.connect(self.view_refacciones)
         self.layout.addWidget(self.btn_view_refacciones)
+        
 
         # Contenedor principal
         container = QWidget()
@@ -133,18 +157,24 @@ class ServiceView(QMainWindow):
         fecha_servicio = self.input_fecha_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         proximo_servicio = self.input_proximo_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         responsable = self.input_responsable.currentText()
-        entregado_por = self.input_entregado_por.text()
-        diagonostico = self.input_diagnostico.text()
 
-        if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagonostico):
+        # Obtener el valor de "Entregado Por"
+        if self.radio_cliente_existente.isChecked():
+            entregado_por = self.combo_entregado_por.currentText()  # Cliente seleccionado
+        else:
+            entregado_por = self.input_entregado_por.text()  # Nombre ingresado manualmente
+
+        diagnostico = self.input_diagnostico.text()
+
+        if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagnostico):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
             return
-        
+
         if estatus == "Selecciona una opción":
             QMessageBox.warning(self, "Error", "Debes seleccionar un estatus válido.")
             return
 
-        if self.controller.add_service(id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagonostico):
+        if self.controller.add_service(id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
             QMessageBox.information(self, "Éxito", "Servicio agregado correctamente.")
             self.load_services()
             self.populate_entregado_por_combobox()  # Volver a llenar el combobox
@@ -152,33 +182,81 @@ class ServiceView(QMainWindow):
         else:
             QMessageBox.critical(self, "Error", "No se pudo agregar el servicio.")
 
+    #def update_service(self):
+     #   """Actualiza un servicio seleccionado utilizando el controlador."""
+      #  selected_row = self.table.currentRow()
+       # if selected_row == -1:
+        #    QMessageBox.warning(self, "Error", "Selecciona un servicio para actualizar.")
+            return
+        #id_vehiculo = self.input_id_vehiculo.currentData()  # Obtener el ID del vehículo seleccionado
+        #if not id_vehiculo:
+         #   QMessageBox.warning(self, "Error", "Debes seleccionar un vehículo válido.")
+          #  return
+
+        #folio = self.table.item(selected_row, 0).text()
+        #estatus = self.input_estatus.currentText()
+        #fecha_servicio = self.input_fecha_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
+        #proximo_servicio = self.input_proximo_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
+        #responsable = self.input_responsable.currentText()
+        #entregado_por = self.input_entregado_por.currentText()
+        #diagnostico = self.input_diagnostico.text()
+
+        #if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagnostico):
+         #   QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
+          #  return
+        
+        #if estatus == "Selecciona una opción":
+         #   QMessageBox.warning(self, "Error", "Debes seleccionar un estatus válido.")
+          #  return
+
+        #if self.controller.update_service(folio, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
+         #   QMessageBox.information(self, "Éxito", "Servicio actualizado correctamente.")
+          #  self.load_services()
+           # self.populate_vehiculo_combobox()  # Volver a llenar el combobox
+            #self.clear_fields()
+        #else:
+         #   QMessageBox.critical(self, "Error", "No se pudo actualizar el servicio.")
+
     def update_service(self):
         """Actualiza un servicio seleccionado utilizando el controlador."""
         selected_row = self.table.currentRow()
         if selected_row == -1:
             QMessageBox.warning(self, "Error", "Selecciona un servicio para actualizar.")
             return
+
+        # Obtener el ID del vehículo seleccionado
         id_vehiculo = self.input_id_vehiculo.currentData()  # Obtener el ID del vehículo seleccionado
         if not id_vehiculo:
             QMessageBox.warning(self, "Error", "Debes seleccionar un vehículo válido.")
             return
 
+        # Obtener el folio del servicio seleccionado
         folio = self.table.item(selected_row, 0).text()
+
+        # Obtener los valores de los campos
         estatus = self.input_estatus.currentText()
         fecha_servicio = self.input_fecha_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         proximo_servicio = self.input_proximo_servicio.date().toString("yyyy-MM-dd")  # Obtener la fecha seleccionada
         responsable = self.input_responsable.currentText()
-        entregado_por = self.input_entregado_por.text()
+
+        # Manejar el campo "Entregado Por"
+        if self.radio_cliente_existente.isChecked():
+            entregado_por = self.combo_entregado_por.currentText()  # Cliente seleccionado
+        else:
+            entregado_por = self.input_entregado_por.text()  # Nombre ingresado manualmente
+
         diagnostico = self.input_diagnostico.text()
 
+        # Validar que todos los campos estén completos
         if not (estatus and fecha_servicio and proximo_servicio and responsable and entregado_por and diagnostico):
             QMessageBox.warning(self, "Error", "Todos los campos son obligatorios.")
             return
-        
+
         if estatus == "Selecciona una opción":
             QMessageBox.warning(self, "Error", "Debes seleccionar un estatus válido.")
             return
 
+        # Llamar al controlador para actualizar el servicio
         if self.controller.update_service(folio, id_vehiculo, estatus, fecha_servicio, proximo_servicio, responsable, entregado_por, diagnostico):
             QMessageBox.information(self, "Éxito", "Servicio actualizado correctamente.")
             self.load_services()
@@ -186,6 +264,7 @@ class ServiceView(QMainWindow):
             self.clear_fields()
         else:
             QMessageBox.critical(self, "Error", "No se pudo actualizar el servicio.")
+
 
     def delete_service(self):
         """Elimina un servicio seleccionado utilizando el controlador."""
@@ -334,7 +413,7 @@ class ServiceView(QMainWindow):
         self.input_entregado_por.clear()
         self.input_diagnostico.clear()
         
-    def populate_entregado_por_combobox(self):
+    def populate_vehiculo_combobox(self):
         """Llena el combobox de ID Vehículo con información adicional (cliente y teléfono)."""
         self.input_id_vehiculo.clear() 
         vehiculos = self.controller.get_all_id_vehicles()  # Obtener vehículos desde el controlador
@@ -346,3 +425,29 @@ class ServiceView(QMainWindow):
                 self.input_id_vehiculo.addItem(descripcion, vehiculo.id)  # Asociar el ID como dato adicional
         else:
             QMessageBox.warning(self, "Error", "No se pudieron cargar los vehículos.")
+          
+    def populate_entregado_por_combobox(self):
+        """Llena el combobox de clientes registrados."""
+        print("Ejecutando 'populate_entregado_por_combobox'.")  # Depuración
+        if not hasattr(self, 'combo_entregado_por'):
+            print("Error: 'combo_entregado_por' no está definido.")  # Depuración
+            return
+
+        self.combo_entregado_por.clear()
+        clientes = self.controller.get_all_clientes()  # Obtener clientes desde el controlador
+        if clientes:
+            self.combo_entregado_por.addItem("Selecciona un cliente") 
+            for cliente in clientes:
+                self.combo_entregado_por.addItem(cliente.nombre)  # Mostrar solo el nombre del cliente
+            print(f"Clientes cargados: {[cliente.nombre for cliente in clientes]}")  # Depuración
+        else:
+            QMessageBox.warning(self, "Error", "No se pudieron cargar los clientes.")
+    
+    def toggle_entregado_por(self):
+        """Alterna entre el ComboBox y el LineEdit según la selección del radio button."""
+        if self.radio_cliente_existente.isChecked():
+            self.combo_entregado_por.show()
+            self.input_entregado_por.hide()
+        else:
+            self.combo_entregado_por.hide()
+            self.input_entregado_por.show()

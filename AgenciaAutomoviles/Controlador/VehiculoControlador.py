@@ -1,5 +1,5 @@
-from Vehiculo import Vehicle
-from Servicio import Service
+from Modelo.Vehiculo import Vehicle
+from Modelo.Servicio import Service
 
 class VehicleController:
     def get_all_vehicles(self):
@@ -19,7 +19,7 @@ class VehicleController:
     def delete_vehiculo(self, vehiculo_id):
         """Elimina un vehículo por su ID."""
         vehicle = Vehicle(id=vehiculo_id)
-        return vehicle.delete()
+        return vehicle.delete(vehiculo_id)
     
     def get_services_by_vehicle(self, id_vehiculo):
         """Obtiene los servicios asociados a un vehículo específico."""

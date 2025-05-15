@@ -1,7 +1,8 @@
-from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QLineEdit, QLabel
+from PyQt5.QtWidgets import QMainWindow, QVBoxLayout, QWidget, QPushButton, QDateEdit, QLabel
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-from ServicioControlador import ServiceController
+from Controlador.ServicioControlador import ServiceController
+from PyQt5.QtCore import QDate
 
 class DashboardGraphView(QMainWindow):
     def __init__(self):
@@ -18,7 +19,10 @@ class DashboardGraphView(QMainWindow):
         self.label_fecha = QLabel("Filtrar por fecha (YYYY-MM-DD):", self)
         self.layout.addWidget(self.label_fecha)
 
-        self.input_fecha = QLineEdit(self)
+        self.input_fecha = QDateEdit(self)
+        self.input_fecha.setCalendarPopup(True)  # Habilitar el calendario emergente
+        self.input_fecha.setDisplayFormat("yyyy-MM-dd")  # Formato de fecha
+        self.input_fecha.setDate(QDate.currentDate())  # Fecha predeterminada: hoy
         self.layout.addWidget(self.input_fecha)
 
         self.btn_filtrar = QPushButton("Filtrar", self)
@@ -45,7 +49,7 @@ class DashboardGraphView(QMainWindow):
 
     def update_graph(self):
         """Actualiza la gráfica con los datos filtrados por fecha."""
-        fecha = self.input_fecha.text()
+        fecha = self.input_fecha.date().toString("yyyy-MM-dd")
         if not fecha:
             return
 

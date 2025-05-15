@@ -136,6 +136,9 @@ class ServiceView {
   + add_refaccion_to_service(): None
   + view_refacciones(): None
   + delete_refaccion(): None
+  + toggle_entregado_por(): None
+  + populate_entregado_por_combobox(): None
+  + populate_id_vehiculo_combobox(): None
 }
 
 class DashboardGraphView {

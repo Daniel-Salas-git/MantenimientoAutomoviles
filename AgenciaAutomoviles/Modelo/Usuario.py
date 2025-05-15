@@ -1,4 +1,4 @@
-from BaseDatos import BaseDatos
+from Modelo.BaseDatos import BaseDatos
 
 class User:
     def __init__(self, id=None, nombre=None, usuario=None, contraseña=None, rol=None):

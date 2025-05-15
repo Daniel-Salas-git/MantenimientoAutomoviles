@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QLineEdit, QLabel, QMessageBox, QComboBox
-from UsuarioControlador import UserController
+from Controlador.UsuarioControlador import UserController
 
 class UserView(QMainWindow):
     def __init__(self):

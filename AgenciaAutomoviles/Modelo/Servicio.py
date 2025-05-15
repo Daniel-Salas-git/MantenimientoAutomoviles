@@ -1,4 +1,4 @@
-from BaseDatos import BaseDatos
+from Modelo.BaseDatos import BaseDatos
 
 class Service:
     def __init__(self, folio=None, id_vehiculo=None, estatus=None, fecha_servicio=None, proximo_servicio=None, responsable=None, entregado_por=None, diagnostico=None):

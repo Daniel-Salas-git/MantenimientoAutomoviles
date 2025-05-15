@@ -1,4 +1,4 @@
-from BaseDatos import BaseDatos
+from Modelo.BaseDatos import BaseDatos
 
 class Vehicle:
     def __init__(self, id=None, marca=None, modelo=None, año=None, placa=None, cliente=None, telefono=None):

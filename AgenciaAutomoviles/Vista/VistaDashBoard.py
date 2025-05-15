@@ -1,8 +1,9 @@
 from PyQt5.QtWidgets import QMainWindow, QPushButton,QVBoxLayout, QWidget
-from UsuarioVista import UserView
-from ServicioVista import ServiceView
-from VehiculoVista import VehicleView
-from GraficaDashboard import DashboardGraphView
+from Vista.UsuarioVista import UserView
+from Vista.ServicioVista import ServiceView
+from Vista.VehiculoVista import VehicleView
+from Vista.GraficaDashboard import DashboardGraphView
+from Vista.ClienteView import ClienteView
 
 class DashboardView(QMainWindow):
     def __init__(self, rol, login_view):
@@ -21,7 +22,11 @@ class DashboardView(QMainWindow):
         self.btn_logout = QPushButton("Cerrar Sesión", self)
         self.btn_logout.clicked.connect(self.logout)
         layout.addWidget(self.btn_logout)
-
+        
+        # Botón para abrir la gestión de clientes
+        self.btn_clientes = QPushButton("Gestión de Clientes", self)
+        self.btn_clientes.clicked.connect(self.open_cliente_view)
+        layout.addWidget(self.btn_clientes)
 
         # Botón para gestionar usuarios (solo visible para Administrador)
         if rol == "Administrador":
@@ -37,13 +42,14 @@ class DashboardView(QMainWindow):
 
         # Botón para gestionar vehículos (visible para Recepcionista y Administrador)
         if rol in ["Administrador", "Recepcionista"]:
-            self.btn_vehicles = QPushButton("Gestión de Vehículos/Clientes", self)
+            self.btn_vehicles = QPushButton("Gestión de Vehículos", self)
             self.btn_vehicles.clicked.connect(self.open_vehicle_view)
             layout.addWidget(self.btn_vehicles)
     
         self.btn_dashboard = QPushButton("Tablero de Gráficas", self)
         self.btn_dashboard.clicked.connect(self.open_dashboard_graph)
         layout.addWidget(self.btn_dashboard)
+
 
         # Contenedor principal
         container = QWidget()
@@ -68,6 +74,11 @@ class DashboardView(QMainWindow):
     def open_dashboard_graph(self):
         self.dashboard_graph = DashboardGraphView()
         self.dashboard_graph.show()
+    
+    def open_cliente_view(self):
+        """Abre la ventana de gestión de clientes."""
+        self.cliente_view = ClienteView()  # Crear una instancia de ClienteView
+        self.cliente_view.show()  # Mostrar la ventana
     
     def logout(self):
         """Cerrar sesión y volver a la ventana de login."""

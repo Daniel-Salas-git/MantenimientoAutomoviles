@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtWidgets import QApplication
-from VistaLogin import LoginView
+from Vista.VistaLogin import LoginView
 
 if __name__ == "__main__":
     # Crear la aplicación

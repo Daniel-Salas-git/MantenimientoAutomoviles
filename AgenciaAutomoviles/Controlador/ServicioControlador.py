@@ -1,8 +1,9 @@
-from Servicio import Service
-from BaseDatos import BaseDatos
-from ServicioRefaccion import ServicioRefaccion
-from Usuario import User  # Importar el modelo User
-from Vehiculo import Vehicle  # Importar el modelo Vehicle
+from Modelo.Servicio import Service
+from Modelo.BaseDatos import BaseDatos
+from Modelo.ServicioRefaccion import ServicioRefaccion
+from Modelo.Usuario import User  # Importar el modelo User
+from Modelo.Vehiculo import Vehicle  # Importar el modelo Vehicle
+from Modelo.Cliente import Cliente  # Importar el modelo Cliente
 
 
 
@@ -69,3 +70,7 @@ class ServiceController:
     def get_all_id_vehicles(self):
         """Obtiene todos los usuarios desde el modelo Vehicle."""
         return Vehicle.get_all()  # Llama al método estático del modelo Vehicle
+    
+    def get_all_clientes(self):
+        """Obtiene todos los clientes registrados."""
+        return Cliente.get_all()  # Llama al método del modelo para obtener los clientes

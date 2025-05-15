@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QLabel, QLineEdit, QPushButton, QMessageBox, QVBoxLayout
-from UsuarioControlador import UserController
-from VistaDashBoard import DashboardView
+from Controlador.UsuarioControlador import UserController
+from Vista.VistaDashBoard import DashboardView
 
 class LoginView(QMainWindow):
     def __init__(self):

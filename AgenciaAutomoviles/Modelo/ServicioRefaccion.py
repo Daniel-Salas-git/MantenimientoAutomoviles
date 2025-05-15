@@ -1,4 +1,4 @@
-from BaseDatos import BaseDatos
+from Modelo.BaseDatos import BaseDatos
 
 class ServicioRefaccion:
     def __init__(self, id_servicio=None, id_refaccion=None, cantidad=None):

@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QTableWidget, QTableWidgetItem, QPushButton, QVBoxLayout, QWidget, QDialog, QMessageBox
-from VehiculoControlador import VehicleController
-from CuadroDialogoVehiculos import VehiculoDialog
+from Controlador.VehiculoControlador import VehicleController
+from Vista.CuadroDialogoVehiculos import VehiculoDialog
 
 class VehicleView(QMainWindow):
     def __init__(self):

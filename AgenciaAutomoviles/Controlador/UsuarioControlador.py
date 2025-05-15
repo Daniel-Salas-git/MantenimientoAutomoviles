@@ -1,4 +1,4 @@
-from Usuario import User
+from Modelo.Usuario import User
 
 class UserController:
     def get_all_users(self):
